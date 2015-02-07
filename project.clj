@@ -1,4 +1,4 @@
-(defproject ethereum.cljs "0.2.0-SNAPSHOT"
+(defproject ethereum.cljs "0.3.0-SNAPSHOT"
   :plugins [[lein-cljsbuild "1.0.4"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2740"]
@@ -11,8 +11,8 @@
     {:source-paths ["src/cljs" "test"]
      :compiler
      {:output-dir "build/out"
-      :output-to "build/ethereum.cljs.js"
-      :optimizations :advanced
+      :output-to "resources/public/ethereum.cljs.js"
+      :optimizations :simple
       ;:pretty-print true
       ;:source-map "build/cljs-web3-test.js.map"
       :preamble ["bignumber.js" "ethereum.min.js" "qunit-1.17.1.js"]

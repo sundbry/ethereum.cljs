@@ -1,9 +1,9 @@
-(ns ethereum.cljs.test.eth
+(ns eth.js.test.eth
   ;(:require-macros [cemerick.cljs.test :refer [is deftest]])
   (:require 
     ;[cemerick.cljs.test :as t]
     [shodan.console :as log :include-macros true]
-    [ethereum.cljs.eth :as eth]))
+    [eth.js.eth :as eth]))
 
 (def multiply-7-source "contract test {
                           function multiply(uint a) returns(uint d) {
