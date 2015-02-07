@@ -3,16 +3,17 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2740"]
                  [shodan "0.4.1"]] ; logging
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "src/cljs"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/out" "resources/public/ethereum.cljs.js"]
   :cljsbuild
   {:builds
    {:dev
     {:source-paths ["src/cljs" "test"]
      :compiler
-     {:output-dir "resources/public/out"
-      :output-to "resources/public/ethereum.cljs.js"
-      :optimizations :none
-      :pretty-print true
+     {:output-dir "build/out"
+      :output-to "build/ethereum.cljs.js"
+      :optimizations :advanced
+      ;:pretty-print true
       ;:source-map "build/cljs-web3-test.js.map"
       :preamble ["bignumber.js" "ethereum.min.js" "qunit-1.17.1.js"]
       :externs ["externs/bignumber.ext.js" "externs/ethereum.ext.js"]}}}}
