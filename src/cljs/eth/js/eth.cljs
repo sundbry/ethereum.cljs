@@ -102,9 +102,12 @@
    (.transact rpc (clj->js params) callback)))
 
 (defn call 
-  [contract params]
-  (log/debug "Call params:" params)
-  (.call rpc contract (clj->js params)))
+  ([contract]
+   (log/debug "doing call")
+   (.call rpc contract))
+  ([contract params]
+   (log/debug "Call params:" (clj->js params))
+   (.call rpc contract (clj->js params))))
 
 (defn uncle
   "Returns the uncle number _i from block with number _number. "
@@ -144,4 +147,6 @@
   (str (.toExponential (js/parseInt wei)) " wei"))
 
 (defn return-value [result]
+  (log/debug "Transaction result:" result)
   (-> result .-c (nth 0)))
+

@@ -24707,10 +24707,26 @@ eth.js.eth.transact = function() {
   a.cljs$core$IFn$_invoke$arity$2 = c;
   return a;
 }();
-eth.js.eth.call = function(a, b) {
-  console.debug("Call params:", b);
-  return eth.js.eth.rpc.call(a, cljs.core.clj__GT_js.call(null, b));
-};
+eth.js.eth.call = function() {
+  var a = null, b = function(a) {
+    console.debug("doing call");
+    return eth.js.eth.rpc.call(a);
+  }, c = function(a, b) {
+    console.debug("Call params:", cljs.core.clj__GT_js.call(null, b));
+    return eth.js.eth.rpc.call(a, cljs.core.clj__GT_js.call(null, b));
+  }, a = function(a, e) {
+    switch(arguments.length) {
+      case 1:
+        return b.call(this, a);
+      case 2:
+        return c.call(this, a, e);
+    }
+    throw Error("Invalid arity: " + arguments.length);
+  };
+  a.cljs$core$IFn$_invoke$arity$1 = b;
+  a.cljs$core$IFn$_invoke$arity$2 = c;
+  return a;
+}();
 eth.js.eth.uncle = function(a, b) {
   return eth.js.eth.rpc.uncle(a, b);
 };
@@ -24735,6 +24751,7 @@ eth.js.eth.currency_str = function(a) {
   return[cljs.core.str(parseInt(a).toExponential()), cljs.core.str(" wei")].join("");
 };
 eth.js.eth.return_value = function(a) {
+  console.debug("Transaction result:", a);
   return cljs.core.nth.call(null, a.c, 0);
 };
 eth.js.test = {};
@@ -24743,9 +24760,7 @@ eth.js.test.eth.multiply_7_source = "contract test {\n                          
 eth.js.test.eth.multiply_7_abi = new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 4, ["name", "multiply(uint256)", "type", "function", "inputs", new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 2, ["name", "a", "type", "uint256"], null)], null), "outputs", new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 
 2, ["name", "d", "type", "uint256"], null)], null)], null)], null);
 eth.js.test.eth.make_solidity_contract = function(a, b) {
-  var c = eth.js.eth.solidity.call(null, a), c = eth.js.eth.transact.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "code", "code", 1586293142), c], null));
-  console.debug("New contract address:", c);
-  c = eth.js.eth.contract.call(null, c, b);
+  var c = eth.js.eth.solidity.call(null, a), c = eth.js.eth.transact.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "code", "code", 1586293142), c], null)), c = eth.js.eth.contract.call(null, c, b);
   console.debug("Contract constructed", c);
   return c;
 };
@@ -24755,22 +24770,44 @@ eth.js.test.eth.call_contract_fn = function(a, b) {
   console.debug("Call result:", c);
   return c;
 };
+eth.js.test.eth.test_serpent_compiler = function(a) {
+  var b = eth.js.eth.solidity.call(null, eth.js.test.eth.multiply_7_source);
+  console.debug("Multiply-7 compiled to bytecode:", b);
+  a.ok(null != b);
+  a.ok(20 < cljs.core.count.call(null, b));
+  return a;
+};
+eth.js.test.eth.test_tx_create_contract = function(a) {
+  var b = eth.js.eth.solidity.call(null, eth.js.test.eth.multiply_7_source), b = eth.js.eth.transact.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "code", "code", 1586293142), b], null));
+  console.debug("Contract created at address: ", b);
+  a.ok(null != b);
+  a.ok(cljs.core._EQ_.call(null, cljs.core.count.call(null, b), 42));
+  return a;
+};
+eth.js.test.eth.test_contract_js_api = function(a) {
+  var b = eth.js.eth.solidity.call(null, eth.js.test.eth.multiply_7_source);
+  eth.js.eth.transact.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "code", "code", 1586293142), b], null));
+  b = eth.js.test.eth.make_solidity_contract.call(null, eth.js.test.eth.multiply_7_source, eth.js.test.eth.multiply_7_abi);
+  a.ok(cljs.core.some_QMARK_.call(null, b.address));
+  return a;
+};
 eth.js.test.eth.test_multiply_contract = function(a) {
   var b = function(a) {
     return function(b) {
-      return eth.js.eth.return_value.call(null, eth.js.test.eth.call_contract_fn.call(null, a, function(a) {
-        return function(a) {
-          return a.multiply(b);
-        };
-      }(a)));
+      return eth.js.eth.return_value.call(null, a.call().multiply(b));
     };
   }(eth.js.test.eth.make_solidity_contract.call(null, eth.js.test.eth.multiply_7_source, eth.js.test.eth.multiply_7_abi));
   a.ok(cljs.core._EQ_.call(null, 0, b.call(null, 0)));
   a.ok(cljs.core._EQ_.call(null, 21, b.call(null, 3)));
-  return a.ok(cljs.core._EQ_.call(null, 28, b.call(null, 4)));
+  a.ok(cljs.core._EQ_.call(null, 28, b.call(null, 4)));
+  return a;
 };
 eth.js.test.eth.run_local_tests = function(a) {
-  return a.test("Contract test", eth.js.test.eth.test_multiply_contract);
+  a.test("Serpent compiler", eth.js.test.eth.test_serpent_compiler);
+  a.test("Create contract transaction", eth.js.test.eth.test_tx_create_contract);
+  a.test("Instantiate contract", eth.js.test.eth.test_contract_js_api);
+  a.test("Run contract", eth.js.test.eth.test_multiply_contract);
+  return a;
 };
 eth.js.test.web3 = {};
 eth.js.test.web3.test_sha3 = function(a) {
