@@ -17,3 +17,4 @@
   (.test js/QUnit "Hello test" test-hello)
   (test-eth/run-tests)
   (log/info "Tests complete"))
+
