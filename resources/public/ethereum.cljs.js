@@ -24769,8 +24769,20 @@ eth.js.test.eth.test_multiply_contract = function(a) {
   a.ok(cljs.core._EQ_.call(null, 21, b.call(null, 3)));
   return a.ok(cljs.core._EQ_.call(null, 28, b.call(null, 4)));
 };
-eth.js.test.eth.run_tests = function() {
-  return QUnit.test("Contract test", eth.js.test.eth.test_multiply_contract);
+eth.js.test.eth.run_local_tests = function(a) {
+  return a.test("Contract test", eth.js.test.eth.test_multiply_contract);
+};
+eth.js.test.web3 = {};
+eth.js.test.web3.test_sha3 = function(a) {
+  var b = eth.js.web3.sha3.call(null, eth.js.web3.from_ascii.call(null, "Hello!! McFly!~"));
+  console.debug("hash is: ", b);
+  a.ok(null != b);
+  a.ok(cljs.core._EQ_.call(null, 66, b.length));
+  return a;
+};
+eth.js.test.web3.run_local_tests = function(a) {
+  a.test("SHA3", eth.js.test.web3.test_sha3);
+  return a;
 };
 eth.js.test.init_fixture = function() {
   return eth.js.web3.set_provider.call(null, eth.js.web3.http_provider.call(null, "http://localhost:8080"));
@@ -24782,17 +24794,18 @@ eth.js.test.test_connect = function(a) {
   a.ok(eth.js.eth.listening_QMARK_.call(null), "Listening for connections");
   return a.ok(0 < eth.js.eth.peer_count.call(null), "More than 0 peers");
 };
-eth.js.test.run_local_tests = function() {
-  var a = QUnit;
-  a.test("Meta test", eth.js.test.test_hello);
+eth.js.test.run_local_tests = function(a) {
+  a.test("Test oracle", eth.js.test.test_hello);
   a.test("Connect test", eth.js.test.test_connect);
   return a;
 };
 eth.js.test.run_tests = function() {
   console.info("Starting tests");
   eth.js.test.init_fixture.call(null);
-  eth.js.test.run_local_tests.call(null);
-  eth.js.test.eth.run_tests.call(null);
+  var a = QUnit;
+  eth.js.test.run_local_tests.call(null, a);
+  eth.js.test.web3.run_local_tests.call(null, a);
+  eth.js.test.eth.run_local_tests.call(null, a);
   return console.info("Tests complete");
 };
 goog.exportSymbol("eth.js.test.run_tests", eth.js.test.run_tests);

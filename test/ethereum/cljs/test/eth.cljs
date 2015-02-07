@@ -52,6 +52,6 @@
     (.ok qassert (= 21 (multiply 3)))
     (.ok qassert (= 28 (multiply 4)))))
 
-(defn run-tests []
-  (.test js/QUnit "Contract test" test-multiply-contract))
+(defn run-local-tests [qunit]
+  (.test qunit "Contract test" test-multiply-contract))
 
