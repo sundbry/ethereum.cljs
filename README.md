@@ -3,7 +3,7 @@ ClojureScript namespaces for ethereum.js
 
 # Usage
 
-    ``[ethereum.cljs ["0.1.0-SNAPSHOT"]]``
+``[ethereum.cljs ["0.1.0-SNAPSHOT"]]``
 
     (:require
       '[cljs-web3.core :as web3]
