@@ -1,8 +1,8 @@
-(ns cljs-web3.test
+(ns ethereum.cljs.test
   (:require
     [shodan.console :as log :include-macros true]
-    [cljs-web3.core :as web3]
-    [cljs-web3.test.eth :as test-eth]))
+    [ethereum.cljs.web3 :as web3]
+    [ethereum.cljs.test.eth :as test-eth]))
 
 (defn- init-fixture []
   (web3/set-provider (web3/http-provider "http://localhost:8080")))
