@@ -12,7 +12,7 @@
      :compiler
      {:output-dir "build/out"
       :output-to "resources/public/ethereum.cljs.js"
-      :optimizations :simple
+      :optimizations :simple ; breaks some functions in ethereum.js on :advanced 
       ;:pretty-print true
       ;:source-map "build/cljs-web3-test.js.map"
       :preamble ["bignumber.js" "ethereum.min.js" "qunit-1.17.1.js"]
