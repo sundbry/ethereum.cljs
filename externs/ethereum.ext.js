@@ -48,14 +48,28 @@ web3.eth.serpent = function(source) {};
 
 // Local DB
 
+web3.db;
 web3.db.put = function(table, key, intVal) {};
 web3.db.putString = function(table, key, strVal) {};
 web3.db.get = function(table, key) {};
 web3.db.getString = function(table, key) {};
 
 // Whsiper
-// TODO
-//web3.shh;
-
-//web3.shh.post = 
+web3.shh;
+/* Post a whsiper message.
+ * from: identity of sender
+ * to: identity of receiver
+ * payload: message payload
+ * ttl: time to live
+ * workToProve: TODO
+ * topic: string or array of strings, with message topics */
+web3.shh.post = function (msgData) {};
+// Creates a new identity address.
+web3.shh.newIdentity = function() {};
+// Return true iff an entity belongs to us.
+web3.shh.haveIdentity = function(ident) {};
+/* Returns a watcher for whisper messages matching params.
+ * topic: string or array
+ * to: identity of receiver */
+web3.ssh.watch = function(params) {};
 

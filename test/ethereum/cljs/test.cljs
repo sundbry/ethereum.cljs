@@ -4,7 +4,8 @@
     [eth.js.web3 :as web3]
     [eth.js.eth :as eth]
     [eth.js.test.web3 :as test-web3]
-    [eth.js.test.eth :as test-eth]))
+    [eth.js.test.eth :as test-eth]
+    [eth.js.test.shh :as test-shh]))
 
 (defn- init-fixture []
   (web3/set-provider (web3/http-provider "http://localhost:8080")))
@@ -28,6 +29,7 @@
   (doto js/QUnit
     (run-local-tests)
     (test-web3/run-local-tests)
-    (test-eth/run-local-tests))
+    (test-eth/run-local-tests)
+    (test-shh/run-local-tests))
   (log/info "Tests complete"))
 

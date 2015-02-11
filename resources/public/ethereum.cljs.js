@@ -24633,6 +24633,35 @@ eth.js.web3.http_provider = function(a) {
 eth.js.web3.qt_provider = function(a) {
   return new eth.js.web3.web3.providers.QtSyncProvider(a);
 };
+eth.js.shh = {};
+eth.js.shh.rpc = eth.js.web3.web3.shh;
+eth.js.shh.message_defaults = new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "ttl", "ttl", -1115275118), 300], null);
+eth.js.shh.message = function(a) {
+  return cljs.core.merge.call(null, eth.js.shh.message_defaults, a);
+};
+eth.js.shh.post = function(a) {
+  a = cljs.core.clj__GT_js.call(null, a);
+  return eth.js.shh.rpc.post(a);
+};
+eth.js.shh.new_identity = function() {
+  return eth.js.shh.rpc.newIdentity();
+};
+eth.js.test = {};
+eth.js.test.shh = {};
+eth.js.test.shh.get_idents = function() {
+  var a = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [eth.js.shh.new_identity.call(null), eth.js.shh.new_identity.call(null)], null);
+  return console.info("Test idents created:", a);
+};
+eth.js.test.shh.test_post = function(a) {
+  var b = eth.js.web3.from_ascii.call(null, "Hello world!"), c = eth.js.test.shh.get_idents.call(null), d = cljs.core.nth.call(null, c, 0, null), c = cljs.core.nth.call(null, c, 1, null), b = eth.js.shh.message.call(null, new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "payload", "payload", -383036092), b, new cljs.core.Keyword(null, "to", "to", 192099007), d, new cljs.core.Keyword(null, "from", "from", 1815293044), c], null)), b = eth.js.shh.post.call(null, b);
+  console.debug("post result is:", b);
+  a.ok(null != b);
+  return a;
+};
+eth.js.test.shh.run_local_tests = function(a) {
+  a.test("post()", eth.js.test.shh.test_post);
+  return a;
+};
 eth.js.eth = {};
 eth.js.eth.rpc = eth.js.web3.web3.eth;
 eth.js.eth.coinbase = function() {
@@ -24754,7 +24783,6 @@ eth.js.eth.return_value = function(a) {
   console.debug("Transaction result:", a);
   return cljs.core.nth.call(null, a.c, 0);
 };
-eth.js.test = {};
 eth.js.test.eth = {};
 eth.js.test.eth.multiply_7_source = "contract test {\n                          function multiply(uint a) returns(uint d) {\n                            return a * 7;\n                          }\n                        }";
 eth.js.test.eth.multiply_7_abi = new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 4, ["name", "multiply(uint256)", "type", "function", "inputs", new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 2, ["name", "a", "type", "uint256"], null)], null), "outputs", new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 
@@ -24843,6 +24871,7 @@ eth.js.test.run_tests = function() {
   eth.js.test.run_local_tests.call(null, a);
   eth.js.test.web3.run_local_tests.call(null, a);
   eth.js.test.eth.run_local_tests.call(null, a);
+  eth.js.test.shh.run_local_tests.call(null, a);
   return console.info("Tests complete");
 };
 goog.exportSymbol("eth.js.test.run_tests", eth.js.test.run_tests);
