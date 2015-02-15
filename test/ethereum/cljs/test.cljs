@@ -7,9 +7,9 @@
     [eth.js.test.eth :as test-eth]
     [eth.js.test.shh :as test-shh]))
 
-(defn- init-fixture []
+(defn- init-fixture
+  []
   (web3/set-provider (web3/http-provider "http://localhost:8080")))
-
 
 (defn- test-hello [qassert]
   (.ok qassert true "Passed!"))

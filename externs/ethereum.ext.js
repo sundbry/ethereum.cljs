@@ -1,4 +1,6 @@
-//var require = function(module) {};
+// Web3 externs
+// Derived from documentation at https://github.com/ethereum/wiki/wiki/JavaScript-API#web3db
+
 var web3 = {};
 
 web3.sha3 = function(hexStr) {};
@@ -9,9 +11,13 @@ web3.fromDecimal = function(bigDec) {};
 web3.setProvider = function(provider) {};
 web3.reset = function() {};
 
+// Interfaces
+
 web3.providers;
 web3.providers.HttpSyncProvider = function(opts) {};
 web3.providers.QtSyncProvider = function(opts) {};
+
+// Ethereum API
 
 web3.eth;
 web3.eth.coinbase;
@@ -22,8 +28,6 @@ web3.eth.accounts;
 web3.eth.peerCount;
 web3.eth.defaultBlock;
 web3.eth.number;
-
-// Ethereum API
 
 web3.eth.balanceAt = function(address) {};
 web3.eth.stateAt = function(contractAddr, storeAddr) {};
@@ -40,7 +44,7 @@ web3.eth.watch = function(filter) {};
 web3.eth.contract = function(address, abi) {};
 web3.eth.compilers = function() {};
 
-// Builtin-compilers
+// Integrated EVM compilers
 
 web3.eth.solidity = function(source) {};
 web3.eth.lll = function(source) {};
@@ -55,21 +59,10 @@ web3.db.get = function(table, key) {};
 web3.db.getString = function(table, key) {};
 
 // Whsiper
+
 web3.shh;
-/* Post a whsiper message.
- * from: identity of sender
- * to: identity of receiver
- * payload: message payload
- * ttl: time to live
- * workToProve: TODO
- * topic: string or array of strings, with message topics */
-web3.shh.post = function (msgData) {};
-// Creates a new identity address.
+web3.shh.post = function (params) {};
 web3.shh.newIdentity = function() {};
-// Return true iff an entity belongs to us.
 web3.shh.haveIdentity = function(ident) {};
-/* Returns a watcher for whisper messages matching params.
- * topic: string or array
- * to: identity of receiver */
 web3.ssh.watch = function(params) {};
 
