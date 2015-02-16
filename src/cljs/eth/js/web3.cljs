@@ -4,6 +4,11 @@
 
 (def web3 (js/require "web3"))
 
+(defn js-dict [clj-or-js-dict]
+  (if (map? clj-or-js-dict)
+    (clj->js clj-or-js-dict)
+    clj-or-js-dict))
+
 ;; Web3 Javascript API
 ;; from https://github.com/ethereum/wiki/wiki/JavaScript-API
 
