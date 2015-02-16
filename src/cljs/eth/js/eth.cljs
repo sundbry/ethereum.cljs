@@ -1,7 +1,7 @@
 (ns eth.js.eth
   (:require
     [shodan.console :as log :include-macros true]
-    [eth.js.web3 :as web3 :refer [js-dict]]))
+    [eth.js.web3 :as web3 :refer [js-val]]))
 
 (def rpc (.-eth web3/web3))
 
@@ -96,18 +96,18 @@
 (defn transact
   ([params]
    (log/debug "Transaction params:" params)
-   (.transact rpc (js-dict params)))
+   (.transact rpc (js-val params)))
   ([params callback]
    (log/debug "Transaction params:" params)
-   (.transact rpc (js-dict params) callback)))
+   (.transact rpc (js-val params) callback)))
 
 (defn call 
   ([contract]
    (log/debug "doing call")
    (.call rpc contract))
   ([contract params]
-   (log/debug "Call params:" (js-dict params))
-   (.call rpc contract (js-dict params))))
+   (log/debug "Call params:" (js-val params))
+   (.call rpc contract (js-val params))))
 
 (defn uncle
   "Returns the uncle number _i from block with number _number. "
@@ -117,7 +117,7 @@
 (defn logs
   "Returns list of log messages"
   [filter-params]
-  (.logs rpc (js-dict filter-params)))
+  (.logs rpc (js-val filter-params)))
 
 (defn watch
   "Creates a watch object to notify when the state changes in a particular way, given by _filter. Filter may be a log filter object, as defined above. It may also be either 'chain' or 'pending' to watch for changes in the chain or pending transactions respectively.
@@ -125,12 +125,12 @@
     logs(): Returns all of the log entries that fit _filter.
     uninstall(): Uninstalls the watch. Should always be called once it is done with."
   [filter-params]
-  (.watch rpc (js-dict filter-params)))
+  (.watch rpc (js-val filter-params)))
 
 (defn contract 
   "Construct a contract interface from data"
   [addr abi]
-  (let [abi-json (js-dict abi)]
+  (let [abi-json (js-val abi)]
     (log/debug "Constructing contract with ABI:" abi-json)
     (.contract rpc addr abi-json)))
 

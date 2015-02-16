@@ -24590,6 +24590,9 @@ for (var shodan = {console:{}}, methods_11557 = new cljs.core.PersistentVector(n
 ;var eth = {js:{}};
 eth.js.web3 = {};
 eth.js.web3.web3 = require("web3");
+eth.js.web3.js_val = function(a) {
+  return cljs.core.map_QMARK_.call(null, a) ? cljs.core.clj__GT_js.call(null, a) : cljs.core.vector_QMARK_.call(null, a) ? cljs.core.clj__GT_js.call(null, a) : a;
+};
 eth.js.web3.sha3 = function(a) {
   return eth.js.web3.web3.sha3(a);
 };
@@ -24677,7 +24680,7 @@ eth.js.eth.gas_price = function() {
   return eth.js.eth.rpc.gasPrice;
 };
 eth.js.eth.accounts = function() {
-  return eth.js.eth.rpc.accounts;
+  return cljs.core.js__GT_clj.call(null, eth.js.eth.rpc.accounts);
 };
 eth.js.eth.peer_count = function() {
   return eth.js.eth.rpc.peerCount;
@@ -24719,10 +24722,10 @@ eth.js.eth.txn = function(a, b) {
 eth.js.eth.transact = function() {
   var a = null, b = function(a) {
     console.debug("Transaction params:", a);
-    return eth.js.eth.rpc.transact(cljs.core.clj__GT_js.call(null, a));
+    return eth.js.eth.rpc.transact(eth.js.web3.js_val.call(null, a));
   }, c = function(a, b) {
     console.debug("Transaction params:", a);
-    return eth.js.eth.rpc.transact(cljs.core.clj__GT_js.call(null, a), b);
+    return eth.js.eth.rpc.transact(eth.js.web3.js_val.call(null, a), b);
   }, a = function(a, e) {
     switch(arguments.length) {
       case 1:
@@ -24741,8 +24744,8 @@ eth.js.eth.call = function() {
     console.debug("doing call");
     return eth.js.eth.rpc.call(a);
   }, c = function(a, b) {
-    console.debug("Call params:", cljs.core.clj__GT_js.call(null, b));
-    return eth.js.eth.rpc.call(a, cljs.core.clj__GT_js.call(null, b));
+    console.debug("Call params:", eth.js.web3.js_val.call(null, b));
+    return eth.js.eth.rpc.call(a, eth.js.web3.js_val.call(null, b));
   }, a = function(a, e) {
     switch(arguments.length) {
       case 1:
@@ -24760,13 +24763,13 @@ eth.js.eth.uncle = function(a, b) {
   return eth.js.eth.rpc.uncle(a, b);
 };
 eth.js.eth.logs = function(a) {
-  return eth.js.eth.rpc.logs(cljs.core.clj__GT_js.call(null, a));
+  return eth.js.eth.rpc.logs(eth.js.web3.js_val.call(null, a));
 };
 eth.js.eth.watch = function(a) {
-  return eth.js.eth.rpc.watch(cljs.core.clj__GT_js.call(null, a));
+  return eth.js.eth.rpc.watch(eth.js.web3.js_val.call(null, a));
 };
 eth.js.eth.contract = function(a, b) {
-  var c = cljs.core.clj__GT_js.call(null, b);
+  var c = eth.js.web3.js_val.call(null, b);
   console.debug("Constructing contract with ABI:", c);
   return eth.js.eth.rpc.contract(a, c);
 };
