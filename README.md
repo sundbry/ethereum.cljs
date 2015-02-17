@@ -3,11 +3,17 @@ ClojureScript namespaces for ethereum.js
 
 # Usage
 
-``[ethereum.cljs "0.1.0-SNAPSHOT"]``
+``[ethereum.cljs "0.3.0-SNAPSHOT"]``
 
     (:require
-      '[cljs-web3.core :as web3]
-      '[cljs-web3.eth :as eth])
+      [eth.js.web3 :as web3]
+      [eth.js.eth :as eth]
+      [eth.js.shh :as shh])
+
+# Running tests
+    cd ethereum.cljs
+    lein run
+    # firefox http://localhost:8081
 
 # Documentation
 The source code is the documentation!
