@@ -12,6 +12,7 @@ ClojureScript namespaces for ethereum.js
 
 # Running tests
     cd ethereum.cljs
+    eth -j &
     lein run
     # firefox http://localhost:8081
 
