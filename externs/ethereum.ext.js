@@ -17,15 +17,21 @@ web3.providers;
 web3.providers.HttpSyncProvider = function(opts) {};
 web3.providers.QtSyncProvider = function(opts) {};
 
+// Network API
+web3.net;
+web3.net.listening;
+web3.net.peerCount;
+
+web3.net.getListening = function(cb) {};
+web3.net.getPeerCount = function(cb) {};
+
 // Ethereum API
 
 web3.eth;
 web3.eth.coinbase;
-web3.eth.listening;
 web3.eth.mining;
 web3.eth.gasPrice;
 web3.eth.accounts;
-web3.eth.peerCount;
 web3.eth.defaultBlock;
 web3.eth.number;
 
