@@ -38,10 +38,10 @@
   []
   (.-number rpc))
 
-(defn balance-at 
+(defn get-balance
   "Returns the balance of the account of address given by the address _a"
   [account-id]
-  (.balanceAt rpc account-id))
+  (.getBalance rpc account-id))
 
 (defn state-at 
   "Returns the value in storage at position given by the string _s of the account of address given by the address _a."
@@ -83,13 +83,13 @@
   [blk-num tx-num]
   (.transaction rpc blk-num tx-num))
 
-(defn transact
+(defn send-transaction
   ([params]
    (log/debug "Transaction params:" params)
-   (.transact rpc (js-val params)))
+   (.sendTransaction rpc (js-val params)))
   ([params callback]
    (log/debug "Transaction params:" params)
-   (.transact rpc (js-val params) callback)))
+   (.sendTransaction rpc (js-val params) callback)))
 
 (defn call 
   ([contract]
@@ -119,24 +119,19 @@
 
 (defn contract 
   "Construct a contract interface from data"
-  [addr abi]
+  [abi]
   (let [abi-json (js-val abi)]
-    (log/debug "Constructing contract with ABI:" abi-json)
-    (.contract rpc addr abi-json)))
+    (log/debug "Constructing contract with ABI:" (.stringify js/JSON abi-json))
+    (.contract rpc abi-json)))
 
 (defn compilers []
   "Returns list of available compilers"
-  (seq (.compilers rpc)))
+  (seq (.getCompilers rpc)))
 
 (defn solidity [source-code-str]
-  (.solidity rpc source-code-str))
+  (js->clj (.solidity (.-compile rpc) source-code-str)))
 
 ;; Custom functions
 
 (defn currency-str [wei]
   (str (.toExponential (js/parseInt wei)) " wei"))
-
-(defn return-value [result]
-  (log/debug "Transaction result:" result)
-  (-> result .-c (nth 0)))
-

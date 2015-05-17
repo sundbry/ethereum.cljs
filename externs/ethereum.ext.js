@@ -14,7 +14,7 @@ web3.reset = function() {};
 // Interfaces
 
 web3.providers;
-web3.providers.HttpSyncProvider = function(opts) {};
+web3.providers.HttpProvider = function(opts) {};
 web3.providers.QtSyncProvider = function(opts) {};
 
 // Network API
@@ -48,13 +48,13 @@ web3.eth.call = function(params) {};
 web3.eth.logs = function(filter) {};
 web3.eth.watch = function(filter) {};
 web3.eth.contract = function(address, abi) {};
-web3.eth.compilers = function() {};
+web3.eth.getCompilers = function(cb) {};
 
 // Integrated EVM compilers
 
-web3.eth.solidity = function(source) {};
-web3.eth.lll = function(source) {};
-web3.eth.serpent = function(source) {};
+web3.eth.compile.solidity = function(source, cb) {};
+web3.eth.compile.lll = function(source, cb) {};
+web3.eth.compile.serpent = function(source, cb) {};
 
 // Local DB
 

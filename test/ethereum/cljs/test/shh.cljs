@@ -18,5 +18,5 @@
       (.ok (not (nil? post-result))))))
 
 (defn run-local-tests [qunit]
-  (doto qunit 
+  #_(doto qunit 
     (.test "post()" test-post)))

@@ -7,28 +7,34 @@
     [shodan.console :as log :include-macros true]
     [eth.js.eth :as eth]))
 
-(def multiply-7-source "contract test {
-                          function multiply(uint a) returns(uint d) {
-                            return a * 7;
-                          }
-                        }")
+(def multiply-7-source
+  "contract Test {
+     function multiply(uint256 a) returns (uint256 d) {
+       return a * 7;
+     }
+     function one() returns (uint32 r) {
+       return 1;
+     }
+   }")
 
 
-(def multiply-7-abi [{"name" "multiply(uint256)"
-                      "type" "function"
-                      "inputs"
-                      [{"name" "a"
-                        "type" "uint256"}]
-                      "outputs"
-                      [{"name" "d"
-                        "type" "uint256"}]}])
-
-(defn make-solidity-contract [source abi]
-  (let [code (eth/solidity source)
-        address (eth/transact {:code code})
-        contract (eth/contract address abi)]
-    (log/debug "Contract constructed" contract)
-    contract))
+(def multiply-7-abi 
+  (clj->js [{"name" "multiply"
+             "type" "function"
+             "inputs"
+             [{"name" "a"
+               "type" "uint256"}]
+             "outputs"
+             [{"name" "d"
+               "type" "uint256"}]}
+            {"name" "one"
+             "type" "function"
+             "inputs"
+             []
+             "outputs"
+             [{"name" "r"
+               "type" "uint32"}]}
+            ]))
 
 (defn call-contract-fn [contract fn-caller]
   (log/debug "Calling contract at" (get contract "address"))
@@ -37,48 +43,67 @@
     (log/debug "Call result:" result)
     result))
 
-(defn test-serpent-compiler [qassert]
-  (let [code (eth/solidity multiply-7-source)]
-    (log/debug "Multiply-7 compiled to bytecode:" code)
+(defn test-solidity-compiler [qassert]
+  (let [{:strs [code info] :as result} (eth/solidity multiply-7-source)]
+    (log/debug "Multiply-7 compiled to bytecode:" result)
     (doto qassert
-      (.ok (not (nil? code)))
+      (.ok (not (nil? result)))
       (.ok (> (count code) 20)))))
 
 (defn test-tx-create-contract [qassert]
-  (let [code (eth/solidity multiply-7-source)
-        address (eth/transact {:code code})]
-    (log/debug "Contract created at address: " address)
+  (let [{:strs [code info]} (eth/solidity multiply-7-source)
+        from-address (first (eth/accounts))
+        address (eth/send-transaction {:from from-address
+                                       :code code})]
+    (log/debug "Contract created at address:" address)
     (doto qassert
       (.ok (not (nil? address)))
       (.ok (= (count address) 42)))))
 
 (defn test-contract-js-api [qassert]
-  (let [code (eth/solidity multiply-7-source)
-        address (eth/transact {:code code})
-        contract (make-solidity-contract multiply-7-source multiply-7-abi)]
+  (let [{:strs [code info]} (eth/solidity multiply-7-source)
+        from-address (first (eth/accounts))
+        address (eth/send-transaction {:from from-address
+                                       :code code})
+        contract-factory (eth/contract multiply-7-abi)
+        contract (.at contract-factory address)]
+    (log/debug "contract:" contract)
     (doto qassert
-      (.ok (some? (.-address contract))))))
+      (.ok (some? (.-address contract)))
+      (.ok (some? (.-multiply contract))))))
 
 (defn test-multiply-contract [qassert]
-  (let [contract (make-solidity-contract multiply-7-source multiply-7-abi)
-        ;_ (log/debug "macroing invoke")
-        ;invoke (fn [(macro/invoker 'multiply 
-        ;multiply #(macro/invoke caller "multiply" %)
+  (let [{:strs [code info]} (eth/solidity multiply-7-source)
+        from-address (first (eth/accounts))
+        address (eth/send-transaction {:from from-address
+                                       :code code})
+        contract-factory (eth/contract multiply-7-abi)
+        contract (.at contract-factory address)
+        cb (fn [error result]
+             (log/debug "call result:" (str result) "error:" error))
+        tx (clj->js {:from from-address})
+        tx2 (clj->js {:from from-address})
         multiply (fn [x] 
-                   (-> contract
-                       .call
-                       (.multiply x)
-                       (eth/return-value)))]
-    ;(log/debug "Invoke result:" multiply)
+                   (let [res (-> contract
+                                 .-multiply 
+                                 (.sendTransaction x tx cb)
+                                 #_(.call x))]
+                     (log/debug "result:" (str res))
+                     res))
+        
+        one (fn []
+              (let [res (-> contract .-one (.sendTransaction tx2 cb) #_(.call))]
+                (log/debug "one result:" (str res))
+                res))]
     (doto qassert
-      (.ok (= 0 (multiply 0)))
-      (.ok (= 21 (multiply 3)))
-      (.ok (= 28 (multiply 4))))))
+      (.ok (= "1" (str (one))))
+      (.ok (= "14" (str (multiply 2))))
+      #_(.ok (= "21" (str (multiply 3))))
+      #_(.ok (= "28" (str (multiply 4)))))))
 
 (defn run-local-tests [qunit]
   (doto qunit
-    (.test "Serpent compiler" test-serpent-compiler)
+    (.test "Solidity compiler" test-solidity-compiler)
     (.test "Create contract transaction" test-tx-create-contract)
     (.test "Instantiate contract" test-contract-js-api)
     (.test "Run contract" test-multiply-contract)))
-

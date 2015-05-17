@@ -53,7 +53,7 @@
 ;; Providers
 
 (defn http-provider [uri]
-  (let [constructor (-> web3 .-providers .-HttpSyncProvider)]
+  (let [constructor (-> web3 .-providers .-HttpProvider)]
     (constructor.  uri)))
 
 (defn qt-provider [uri]
