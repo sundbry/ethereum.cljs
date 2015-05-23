@@ -1,43 +1,12 @@
 (ns eth.js.test.eth
-  ;(:require-macros [cemerick.cljs.test :refer [is deftest]])
   (:require-macros
-    [cljs.core.async.macros :refer [go go-loop]]
-    [eth.js.macros :as macro])
+    [cljs.core.async.macros :refer [go go-loop]])
   (:require
     [cljs.core.async :as async]
-    ;[cemerick.cljs.test :as t]
     [shodan.console :as log :include-macros true]
     [eth.js.eth :as eth]
-    [eth.js.eth.util :as eth-util]))
-
-(def multiply-7-source
-  "contract Test {
-     function multiply(uint256 a) returns (uint256 d) {
-       return a * 7;
-     }
-     function one() returns (uint32 r) {
-       return 1;
-     }
-   }")
-
-
-(def multiply-7-abi 
-  (clj->js [{"name" "multiply"
-             "type" "function"
-             "inputs"
-             [{"name" "a"
-               "type" "uint256"}]
-             "outputs"
-             [{"name" "d"
-               "type" "uint256"}]}
-            {"name" "one"
-             "type" "function"
-             "inputs"
-             []
-             "outputs"
-             [{"name" "r"
-               "type" "uint32"}]}
-            ]))
+    [eth.js.eth.util :as eth-util]
+    [eth.js.test.eth.fixture :refer [test-account multiply-7-source multiply-7-abi]]))
 
 (defn call-contract-fn [contract fn-caller]
   (log/debug "Calling contract at" (get contract "address"))
@@ -55,7 +24,7 @@
 
 (defn test-tx-create-contract [qassert]
   (let [{:strs [code info]} (eth/solidity multiply-7-source)
-        from-address (first (eth/accounts))
+        from-address (test-account)
         address (eth/send-transaction {:from from-address
                                        :code code})]
     (log/debug "Contract created at address:" address)
@@ -65,7 +34,7 @@
 
 (defn test-contract-js-api [qassert]
   (let [{:strs [code info]} (eth/solidity multiply-7-source)
-        from-address (first (eth/accounts))
+        from-address (test-account)
         address (eth/send-transaction {:from from-address
                                        :code code})
         contract-factory (eth/contract multiply-7-abi)
@@ -77,7 +46,7 @@
 
 (defn test-multiply-contract [qassert]
   (let [{:strs [code info]} (eth/solidity multiply-7-source)
-        from-address (first (eth/accounts))
+        from-address (test-account)
         latest-blocks (eth/watch "latest")
         address (eth/send-transaction {:from from-address
                                        :code code})
@@ -100,7 +69,6 @@
                 (log/debug "one result:" (str res))
                 res))
         async-done (.async qassert)
-        _ (log/debug "waiting to mine contract at:" address)
         mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
     (go
       (let [{:keys [block tx]} (async/<! mined-chan)]
@@ -109,8 +77,8 @@
         (doto qassert
           (.ok (= "1" (str (one))))
           (.ok (= "14" (str (multiply 2))))
-          #_(.ok (= "21" (str (multiply 3))))
-          #_(.ok (= "28" (str (multiply 4)))))
+          (.ok (= "21" (str (multiply 3))))
+          (.ok (= "28" (str (multiply 4)))))
         (async-done)))))
 
 (defn run-local-tests [qunit]

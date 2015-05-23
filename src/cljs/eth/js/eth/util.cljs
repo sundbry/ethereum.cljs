@@ -7,6 +7,7 @@
     [cljs.core.async.macros :refer [go go-loop]]))
 
 (defn go-wait-mined [latest-blocks-chan from-address contract-code]
+  (log/debug "waiting to mine contract from:" from-address)
   (go-loop
     []
     (let [block-hash (async/<! (:result latest-blocks-chan))

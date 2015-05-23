@@ -76,14 +76,10 @@
   ([block-id tx-details?] (.getBlock rpc block-id tx-details?))
   ([block-id tx-details? cb] (.getBlock rpc block-id tx-details? cb)))
 
-(defn transaction
-  "Returns the transaction number _i from block with number _number."
-  [blk-num tx-num]
-  (.transaction rpc blk-num tx-num))
-
-(defn txn
-  [blk-num tx-num]
-  (.transaction rpc blk-num tx-num))
+(defn get-transaction
+  "Return a transaction with the given hash."
+  ([tx-id] (.getTransaction rpc tx-id))
+  ([tx-id cb] (.getTransaction rpc tx-id cb)))
 
 (defn send-transaction
   ([params]
