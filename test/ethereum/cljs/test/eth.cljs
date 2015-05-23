@@ -7,7 +7,8 @@
     [cljs.core.async :as async]
     ;[cemerick.cljs.test :as t]
     [shodan.console :as log :include-macros true]
-    [eth.js.eth :as eth]))
+    [eth.js.eth :as eth]
+    [eth.js.eth.util :as eth-util]))
 
 (def multiply-7-source
   "contract Test {
@@ -98,29 +99,19 @@
               (let [res (-> contract .-one #_(.sendTransaction tx2 cb) (.call))]
                 (log/debug "one result:" (str res))
                 res))
-        async-done (.async qassert)]
-    (go-loop []
-        (let [block-hash (async/<! (:result latest-blocks))
-              block-info (eth/get-block block-hash true)
-              mined? (.reduce (.-transactions block-info)
-                              (fn [mined block-tx]
-                                (log/debug "block-tx:" block-tx)
-                                (or mined (and (= (.-from block-tx)
-                                                  from-address)
-                                               (not= (.indexOf (.-input block-tx) code)
-                                                     -1))))
-                              false)]
-          (if mined?
-            (do
-              (log/debug "Mined!")
-              (eth/stop-watch latest-blocks)
-              (doto qassert
-                (.ok (= "1" (str (one))))
-                (.ok (= "14" (str (multiply 2))))
-                #_(.ok (= "21" (str (multiply 3))))
-                #_(.ok (= "28" (str (multiply 4)))))
-              (async-done))
-            (recur))))))
+        async-done (.async qassert)
+        _ (log/debug "waiting to mine contract at:" address)
+        mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
+    (go
+      (let [{:keys [block tx]} (async/<! mined-chan)]
+        (log/debug "Mined!" block tx)
+        (eth/stop-watch latest-blocks)
+        (doto qassert
+          (.ok (= "1" (str (one))))
+          (.ok (= "14" (str (multiply 2))))
+          #_(.ok (= "21" (str (multiply 3))))
+          #_(.ok (= "28" (str (multiply 4)))))
+        (async-done)))))
 
 (defn run-local-tests [qunit]
   (doto qunit
