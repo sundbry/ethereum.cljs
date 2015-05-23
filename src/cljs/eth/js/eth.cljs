@@ -1,5 +1,6 @@
 (ns eth.js.eth
   (:require
+    [cljs.core.async :as async]
     [shodan.console :as log :include-macros true]
     [eth.js.web3 :as web3 :refer [js-val]]))
 
@@ -69,10 +70,11 @@
   (let [code (code-at acct-addr)]
     (some? code)))
 
-(defn block
-  "Returns the block with number _number."
-  [blk-num]
-  (.block rpc blk-num))
+(defn get-block
+  "Returns the block with the given hash."
+  ([block-id] (.getBlock rpc block-id))
+  ([block-id tx-details?] (.getBlock rpc block-id tx-details?))
+  ([block-id tx-details? cb] (.getBlock rpc block-id tx-details? cb)))
 
 (defn transaction
   "Returns the transaction number _i from block with number _number."
@@ -110,12 +112,27 @@
   (.logs rpc (js-val filter-params)))
 
 (defn watch
-  "Creates a watch object to notify when the state changes in a particular way, given by _filter. Filter may be a log filter object, as defined above. It may also be either 'chain' or 'pending' to watch for changes in the chain or pending transactions respectively.
-    changed(_f): Installs a handler, _f, which is called when the state changes due to logs that fit _filter. These (new) log entries are passed as a parameter in a format equivalent to the return value of web3.eth.logs.
-    logs(): Returns all of the log entries that fit _filter.
-    uninstall(): Uninstalls the watch. Should always be called once it is done with."
+  "Returns a dictionary of event channels."
   [filter-params]
-  (.watch rpc (js-val filter-params)))
+  (let [filt (.filter rpc (js-val filter-params))
+        error-ch (async/chan 1)
+        result-ch (async/chan 1)]
+    (.watch filt (fn [error block-info]
+                   (when (some? error)
+                     (async/put! error-ch error))
+                   (when (some? block-info)
+                     (async/put! result-ch block-info))))
+    {:error error-ch
+     :result result-ch
+     :filter filt}))
+
+(defn stop-watch
+  "Stops watching a channel dictionary."
+  [{:keys [error result filter]}]
+  (.stopWatching filter)
+  (async/close! result)
+  (async/close! error)
+  nil)
 
 (defn contract 
   "Construct a contract interface from data"
