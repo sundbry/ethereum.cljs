@@ -10,20 +10,25 @@
     [eth.js.eth.util :as eth-util]
     [eth.js.test.eth.fixture :as fixture :refer [test-account]])) 
 
-(defn test-multiply-contract [qassert]
+(defn test-call-transaction [qassert]
   (let [from-address (test-account)
         tx {:from from-address}
-        contract fixture/*multiply-7-contract*
+        contract fixture/*counter-contract*
         async-done (.async qassert)]
+    (log/debug "calling counter")
     (go
       (doto qassert
-        (.ok (= "1" (str (async/<! (call-async contract 'one tx)))))
-        (.ok (= "14" (str (async/<! (call-async contract 'multiply tx 2)))))
-        (.ok (= "21" (str (async/<! (call-async contract 'multiply tx 3)))))
-        (.ok (= "28" (str (async/<! (call-async contract 'multiply tx 4))))))
+        (.ok (= "1" (log/spy (str (async/<! (call-async contract 'increment tx))))))
+        (.ok (= "2" (log/spy (str (async/<! (call-async contract 'increment tx))))))
+        (.ok (= "4" (log/spy (str (async/<! (call-async contract 'increment_n tx 2)))))))
       (async-done))))
 
 (defn run-local-tests [qunit]
-  (doto qunit
-    (.module (str (namespace ::x)))
-    (.test "Run contract" test-multiply-contract)))
+  (go
+    (binding [fixture/*counter-contract*
+              (async/<! (fixture/go-mine-contract
+                          fixture/counter-name
+                          fixture/counter-source))]
+      (doto qunit
+        (.module (str (namespace ::x)))
+        (.test "Call transaction on contract" test-call-transaction)))))

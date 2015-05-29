@@ -18,13 +18,17 @@
     result))
 
 (defn test-solidity-compiler [qassert]
-  (let [result (eth/solidity fixture/multiply-7-source)
-        {:strs [code info]} (get result fixture/multiply-7-name)]
-    (log/debug "Multiply-7 compiled to bytecode")
-    (inspect code)
-    (doto qassert
-      (.ok (not (nil? result)))
-      (.ok (> (count code) 20)))))
+  (doseq [[contract-name contract-source]
+          [[fixture/multiply-7-name fixture/multiply-7-source]
+           [fixture/foo-name fixture/foo-source]
+           [fixture/counter-name fixture/counter-source]]]
+    (log/debug "Compiling" contract-name)
+    (let [result (eth/solidity contract-source)
+          {:strs [code info]} (get result contract-name)]
+      (doto qassert
+        (.ok (some? result))
+        (.ok (> (count code) 0))
+        (.ok (some? (get info "abiDefinition")))))))
 
 (defn test-account-balance [qassert]
   (let [acct (test-account)
@@ -76,11 +80,15 @@
 
 (defn run-local-tests [qunit]
   (go 
-    (binding [fixture/*multiply-7-contract* (async/<! (fixture/go-mine-multiply-7))]
+    (binding [fixture/*multiply-7-contract* 
+              (async/<! (fixture/go-mine-contract 
+                          fixture/multiply-7-name
+                          fixture/multiply-7-source))]
       (doto qunit
         (.module (str (namespace ::x)))
         (.test "Solidity compiler" test-solidity-compiler)
         (.test "Account balance" test-account-balance)
         (.test "Create contract transaction" test-tx-create-contract)
-        (.test "Call contract" test-multiply-contract)
-        (test-eth-async/run-local-tests)))))
+        (.test "Call contract" test-multiply-contract))))
+  (doto qunit
+    (test-eth-async/run-local-tests)))
