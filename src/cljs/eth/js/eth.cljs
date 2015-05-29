@@ -143,8 +143,3 @@
 
 (defn solidity [source-code-str]
   (js->clj (.solidity (.-compile rpc) source-code-str)))
-
-;; Custom functions
-
-(defn currency-str [wei]
-  (str (.toExponential (js/parseInt wei)) " wei"))

@@ -1,6 +1,10 @@
 (ns eth.js.test.eth.fixture
   (:require
+    [shodan.console :as log :include-macros true]
     [eth.js.eth :as eth]))
+
+(def multiply-7-contract
+  "Test")
 
 (def multiply-7-source
   "contract Test {
@@ -32,4 +36,6 @@
 (def test-account
   (memoize
     (fn []
-      (first (eth/accounts)))))
+      (let [acct (first (eth/accounts))]
+        (log/info "Using test account:" acct) 
+        acct))))

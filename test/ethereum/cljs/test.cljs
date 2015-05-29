@@ -6,18 +6,19 @@
     [eth.js.eth :as eth]
     [eth.js.test.web3 :as test-web3]
     [eth.js.test.eth :as test-eth]
+    [eth.js.test.eth.async :as test-eth-async]
     [eth.js.test.shh :as test-shh]))
 
 (defn- init-fixture
   []
-  (web3/set-provider (web3/http-provider "http://localhost:30304")))
+  (web3/set-provider (web3/http-provider "http://localhost:8545")))
 
 (defn- test-lib [qassert]
   (.ok qassert (some? web3/web3) "Passed!"))
 
 (defn- test-connect [qassert]
   (.ok qassert (net/listening?) "Listening for connections")
-  (.ok qassert (> (net/peer-count) 0) "More than 0 peers"))
+  (.ok qassert (integer? (net/peer-count)) "More than 0 peers"))
 
 (defn run-local-tests [qunit]
   (doto qunit
@@ -31,6 +32,7 @@
     (run-local-tests)
     (test-web3/run-local-tests)
     (test-eth/run-local-tests)
+    (test-eth-async/run-local-tests)
     (test-shh/run-local-tests))
   (log/info "Tests complete"))
 
