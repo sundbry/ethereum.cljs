@@ -1,6 +1,6 @@
 (ns eth.js.eth.async)
 
-(defmacro call-async
+(defmacro call
   [contract-sym fn-sym txn-sym & args]
   (let [function-sym (symbol (str ".-" (name fn-symbol)))]
     `(do

@@ -19,4 +19,5 @@
 
 (defn run-local-tests [qunit]
   #_(doto qunit 
+    (.module (str (namespace ::x)))
     (.test "post()" test-post)))

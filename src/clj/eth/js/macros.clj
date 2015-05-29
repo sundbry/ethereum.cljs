@@ -7,14 +7,14 @@
            (log/debug "Call result:" result)
            result))
 
-(defn make-caller [fn-sym arg-symbols]
+#_(defn make-caller [fn-sym arg-symbols]
   (let [memfn-sym (symbol (str "." fn-sym))]
     (list 'fn ['staged-call] 
           ; '(.foo staged-call a b c)
            (cons memfn-sym 
                  (cons 'staged-call arg-symbols)))))
 
-(defmacro invoker [fn-sym arg-symbols]
+#_(defmacro invoker [fn-sym arg-symbols]
   (let [memfn-sym (symbol (str "." fn-sym))]
     (list 'fn ['staged-call] 
           ; '(.foo staged-call a b c)
@@ -28,4 +28,15 @@
            result# (lambda-fn# staged-call#)]
        result#)))
 
-(macroexpand `(invoke {:contract :stub} ~'foo 1))
+#_(macroexpand `(invoke {:contract :stub} ~'foo 1))
+
+
+(defmacro call-async
+  [contract-sym fn-sym txn-sym & args]
+  (let [fn-sym (symbol (str ".-" (name (second fn-sym))))]
+    fn-sym
+    `(do
+       (let [ch# (cljs.core.async/chan 1)
+             cb# (fn [error# result#] (cljs.core.async/put! ch# (or error# result#)))]
+         (.call (~fn-sym ~contract-sym) ~@args ~txn-sym cb#)
+         ch#))))

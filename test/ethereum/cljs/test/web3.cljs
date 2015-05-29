@@ -12,4 +12,5 @@
 
 (defn run-local-tests [qunit]
   (doto qunit 
+    (.module (str (namespace ::x)))
     (.test "SHA3" test-sha3)))

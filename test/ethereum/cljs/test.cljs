@@ -6,7 +6,6 @@
     [eth.js.eth :as eth]
     [eth.js.test.web3 :as test-web3]
     [eth.js.test.eth :as test-eth]
-    [eth.js.test.eth.async :as test-eth-async]
     [eth.js.test.shh :as test-shh]))
 
 (defn- init-fixture
@@ -22,6 +21,7 @@
 
 (defn run-local-tests [qunit]
   (doto qunit
+    (.module (str (namespace ::x)))
     (.test "Test require" test-lib)
     (.test "Connect test" test-connect)))
 
@@ -32,7 +32,6 @@
     (run-local-tests)
     (test-web3/run-local-tests)
     (test-eth/run-local-tests)
-    (test-eth-async/run-local-tests)
     (test-shh/run-local-tests))
   (log/info "Tests complete"))
 

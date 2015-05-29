@@ -7,7 +7,8 @@
     [shodan.inspection :refer [inspect]]
     [eth.js.eth :as eth]
     [eth.js.eth.util :as eth-util]
-    [eth.js.test.eth.fixture :refer [test-account multiply-7-contract multiply-7-source multiply-7-abi]]))
+    [eth.js.test.eth.fixture :as fixture :refer [test-account]]
+    [eth.js.test.eth.async :as test-eth-async]))
 
 (defn call-contract-fn [contract fn-caller]
   (log/debug "Calling contract at" (get contract "address"))
@@ -17,8 +18,8 @@
     result))
 
 (defn test-solidity-compiler [qassert]
-  (let [result (eth/solidity multiply-7-source)
-        {:strs [code info]} (get result multiply-7-contract)]
+  (let [result (eth/solidity fixture/multiply-7-source)
+        {:strs [code info]} (get result fixture/multiply-7-name)]
     (log/debug "Multiply-7 compiled to bytecode")
     (inspect code)
     (doto qassert
@@ -33,68 +34,53 @@
       (.ok (.lte (eth-util/ether 1) balance)))))
 
 (defn test-tx-create-contract [qassert]
-  (let [compiler-out (eth/solidity multiply-7-source)
-        {:strs [code info]} (get compiler-out multiply-7-contract)
-        from-address (test-account)
-        address (eth/send-transaction {:from from-address
-                                       :code code})]
-    (log/debug "Contract created at address:" address)
-    (doto qassert
-      (.ok (not (nil? address)))
-      (.ok (= (count address) 42)))))
-
-(defn test-contract-js-api [qassert]
-  (let [compiler-out (eth/solidity multiply-7-source)
-        {:strs [code info]} (get compiler-out multiply-7-contract)
-        from-address (test-account)
-        address (eth/send-transaction {:from from-address
-                                       :code code})
-        contract-factory (eth/contract multiply-7-abi)
-        contract (.at contract-factory address)]
-    (log/debug "contract:" contract)
-    (doto qassert
-      (.ok (some? (.-address contract)))
-      (.ok (some? (.-multiply contract))))))
-
-(defn test-multiply-contract [qassert]
-  (let [compiler-out (eth/solidity multiply-7-source)
-        {:strs [code info]} (get compiler-out multiply-7-contract)
+  (let [compiler-out (eth/solidity fixture/foo-source)
+        {:strs [code info]} (get compiler-out fixture/foo-name)
         from-address (test-account)
         latest-blocks (eth/watch "latest")
         address (eth/send-transaction {:from from-address
                                        :code code})
-        contract-factory (eth/contract multiply-7-abi)
-        contract (.at contract-factory address)
-        ;cb (fn [error result]
-        ;     (log/debug "call result:" (str result) "error:" error))
-        multiply (fn [x]
-                   (let [res (-> contract
-                                 .-multiply
-                                 #_(.sendTransaction x tx cb)
-                                 (.call x))]
-                     (log/debug "result:" (str res))
-                     res))
-        one (fn []
-              (let [res (-> contract .-one (.call))]
-                (log/debug "one result:" (str res))
-                res))
-        async-done (.async qassert)
-        mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
+        mined-chan (eth-util/go-wait-mined latest-blocks from-address code)
+        async-done (.async qassert)]
+    (log/debug "Contract created at address:" address)
+    (doto qassert
+      (.ok (not (nil? address)))
+      (.ok (= (count address) 42)))
+    (log/debug "Mining contract")
     (go
       (let [{:keys [block tx]} (async/<! mined-chan)]
         (log/debug "Mined!" block tx)
         (eth/stop-watch latest-blocks)
         (doto qassert
-          (.ok (= "1" (str (one))))
-          (.ok (= "14" (str (multiply 2))))
-          (.ok (= "21" (str (multiply 3))))
-          (.ok (= "28" (str (multiply 4)))))
+          (.ok (some? block))
+          (.ok (some? tx)))
         (async-done)))))
 
+(defn test-multiply-contract [qassert]
+  (let [from-address (test-account)
+        multiply (fn [x]
+                   (let [res (-> fixture/*multiply-7-contract*
+                                 .-multiply
+                                 (.call x))]
+                     (log/debug "result:" (str res))
+                     res))
+        one (fn []
+              (let [res (-> fixture/*multiply-7-contract* .-one (.call))]
+                (log/debug "one result:" (str res))
+                res))]
+    (doto qassert
+      (.ok (= "1" (str (one))))
+      (.ok (= "14" (str (multiply 2))))
+      (.ok (= "21" (str (multiply 3))))
+      (.ok (= "28" (str (multiply 4)))))))
+
 (defn run-local-tests [qunit]
-  (doto qunit
-    (.test "Solidity compiler" test-solidity-compiler)
-    (.test "Account balance" test-account-balance)
-    (.test "Create contract transaction" test-tx-create-contract)
-    (.test "Instantiate contract" test-contract-js-api)
-    (.test "Run contract" test-multiply-contract)))
+  (go 
+    (binding [fixture/*multiply-7-contract* (async/<! (fixture/go-mine-multiply-7))]
+      (doto qunit
+        (.module (str (namespace ::x)))
+        (.test "Solidity compiler" test-solidity-compiler)
+        (.test "Account balance" test-account-balance)
+        (.test "Create contract transaction" test-tx-create-contract)
+        (.test "Call contract" test-multiply-contract)
+        (test-eth-async/run-local-tests)))))
