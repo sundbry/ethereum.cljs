@@ -7,8 +7,7 @@
     [shodan.inspection :refer [inspect]]
     [eth.js.eth :as eth]
     [eth.js.eth.util :as eth-util]
-    [eth.js.test.eth.fixture :as fixture :refer [test-account]]
-    [eth.js.test.eth.async :as test-eth-async]))
+    [eth.js.test.eth.fixture :as fixture :refer [test-account]]))
 
 (defn call-contract-fn [contract fn-caller]
   (log/debug "Calling contract at" (get contract "address"))
@@ -89,6 +88,4 @@
         (.test "Solidity compiler" test-solidity-compiler)
         (.test "Account balance" test-account-balance)
         (.test "Create contract transaction" test-tx-create-contract)
-        (.test "Call contract" test-multiply-contract))))
-  (doto qunit
-    (test-eth-async/run-local-tests)))
+        (.test "Call contract" test-multiply-contract)))))

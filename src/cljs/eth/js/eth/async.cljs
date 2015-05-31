@@ -1,4 +1,6 @@
 (ns eth.js.eth.async
+  (:require-macros
+    [eth.js.eth.async])
   (:require
     [cljs.core.async :as async]
     [eth.js.eth :as eth]))

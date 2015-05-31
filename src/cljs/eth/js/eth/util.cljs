@@ -31,7 +31,6 @@
           [error block-info] (async/<! (eth-async/get-block block-hash true))]
       (let [mined-tx (.reduce (.-transactions block-info)
                               (fn [mined-tx block-tx]
-                                (log/debug "block-tx:" block-tx)
                                 (or mined-tx
                                     mined-tx
                                     (when (and (= (.-from block-tx)

@@ -1,16 +1,15 @@
 (ns eth.js.test.eth.async
   (:require-macros
-    [cljs.core.async.macros :refer [go go-loop]]
-    [eth.js.macros :refer [call-async]])
+    [cljs.core.async.macros :refer [go go-loop]])
   (:require
     [cljs.core.async :as async]
     [shodan.console :as log :include-macros true]
     [eth.js.eth :as eth] 
-    [eth.js.eth.async :as eth-async]
+    [eth.js.eth.async :as eth-async :include-macros true]
     [eth.js.eth.util :as eth-util]
     [eth.js.test.eth.fixture :as fixture :refer [test-account]])) 
 
-(defn test-call-transaction [qassert]
+(defn test-call [qassert]
   (let [from-address (test-account)
         tx {:from from-address}
         contract fixture/*counter-contract*
@@ -18,9 +17,22 @@
     (log/debug "calling counter")
     (go
       (doto qassert
-        (.ok (= "1" (log/spy (str (async/<! (call-async contract 'increment tx))))))
-        (.ok (= "2" (log/spy (str (async/<! (call-async contract 'increment tx))))))
-        (.ok (= "4" (log/spy (str (async/<! (call-async contract 'increment_n tx 2)))))))
+        (.ok (< 0 (log/spy (str (async/<! (eth-async/call contract 'increment tx))))))
+        (.ok (< 0 (log/spy (str (async/<! (eth-async/call contract 'increment tx))))))
+        (.ok (< 0 (log/spy (str (async/<! (eth-async/call contract 'increment_n tx 2)))))))
+      (async-done))))
+
+#_(defn test-send-transaction-async [qassert]
+  (let [from-address (test-account)
+        tx {:from from-address}
+        contract fixture/*counter-contract*
+        async-done (.async qassert)]
+    (log/debug "calling counter")
+    (go
+      (doto qassert
+        (.ok (< 0 (log/spy (str (async/<! (call-async contract 'increment tx))))))
+        (.ok (< 0 (log/spy (str (async/<! (call-async contract 'increment tx))))))
+        (.ok (< 0 (log/spy (str (async/<! (call-async contract 'increment_n tx 2)))))))
       (async-done))))
 
 (defn run-local-tests [qunit]
@@ -31,4 +43,4 @@
                           fixture/counter-source))]
       (doto qunit
         (.module (str (namespace ::x)))
-        (.test "Call transaction on contract" test-call-transaction)))))
+        (.test "Async call on contract" test-call)))))

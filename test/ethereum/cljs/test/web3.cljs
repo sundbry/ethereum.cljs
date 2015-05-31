@@ -4,11 +4,10 @@
     [eth.js.web3 :as web3]))
 
 (defn test-sha3 [qassert]
-  (let [hash-str (-> "Hello!! McFly!~" web3/from-ascii web3/sha3)]
-    (log/debug "hash is: " hash-str)
+  (let [hash-str (-> "Hello!! McFly!~" web3/sha3)]
     (doto qassert
       (.ok (not (nil? hash-str)))
-      (.ok (= 66 (.-length hash-str))))))
+      (.ok (= "2c935fa4b133094d021cfbb3220dc422fdf20dc3f9cc8d35d35b8907fb4da269" hash-str)))))
 
 (defn run-local-tests [qunit]
   (doto qunit 

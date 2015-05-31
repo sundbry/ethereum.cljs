@@ -2,10 +2,10 @@
 
 (defmacro call
   [contract-sym fn-sym txn-sym & args]
-  (let [function-sym (symbol (str ".-" (name fn-symbol)))]
+  (let [fn-sym (symbol (str ".-" (name (second fn-sym))))]
+    fn-sym
     `(do
        (let [ch# (cljs.core.async/chan 1)
              cb# (fn [error# result#] (cljs.core.async/put! ch# (or error# result#)))]
-         (.call (~function-sym ~contract-sym) ~@args ~txn-sym cb#)
-         invocation
+         (.call (~fn-sym ~contract-sym) ~@args ~txn-sym cb#)
          ch#))))

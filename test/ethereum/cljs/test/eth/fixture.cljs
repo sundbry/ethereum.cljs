@@ -83,24 +83,6 @@
         (log/info "Using test account:" acct) 
         acct))))
 
-(defn go-mine-multiply-7
-  []
-  (let [compiler-out (eth/solidity multiply-7-source)
-        {:strs [code info]} (get compiler-out multiply-7-name)
-        from-address (test-account)
-        latest-blocks (eth/watch "latest")
-        address (eth/send-transaction {:from from-address
-                                       :code code})
-        contract-factory (eth/contract multiply-7-abi)
-        contract (.at contract-factory address)
-        tx {:from from-address}
-        mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
-    (go
-      (let [{:keys [block tx]} (async/<! mined-chan)]
-        (log/debug "Mined!" block tx)
-        (eth/stop-watch latest-blocks)
-        contract))))
-
 (defn go-mine-contract
   [contract-name source]
   (let [compiler-out (eth/solidity source)
@@ -115,6 +97,24 @@
         mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
     (go
       (let [{:keys [block tx]} (async/<! mined-chan)]
-        (log/debug "Mined!" block tx)
+        (log/debug "Mined contract!" contract-name block tx)
+        (eth/stop-watch latest-blocks)
+        contract))))
+
+#_(defn go-mine-transaction
+  [tx-hash]
+  (let [compiler-out (eth/solidity source)
+        {:strs [code info]} (get compiler-out contract-name)
+        from-address (test-account)
+        latest-blocks (eth/watch "latest")
+        address (eth/send-transaction {:from from-address
+                                       :code code})
+        contract-factory (eth/contract (get info "abiDefinition"))
+        contract (.at contract-factory address)
+        tx {:from from-address}
+        mined-chan (eth-util/go-wait-mined latest-blocks from-address code)]
+    (go
+      (let [{:keys [block tx]} (async/<! mined-chan)]
+        (log/debug "Mined contract!" contract-name block tx)
         (eth/stop-watch latest-blocks)
         contract))))
