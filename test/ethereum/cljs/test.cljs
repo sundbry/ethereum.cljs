@@ -11,7 +11,9 @@
 
 (defn- init-fixture
   []
-  (web3/set-provider (web3/http-provider "http://localhost:8545")))
+  (let [eth-host (-> js/window .-location .-hostname)
+        eth-port 8545]
+    (web3/set-provider (web3/http-provider (str "http://" eth-host ":" eth-port)))))
 
 (defn- test-lib [qassert]
   (.ok qassert (some? web3/web3) "Passed!"))
