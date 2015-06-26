@@ -5,3 +5,10 @@ build
 target
 resources/public/out
 resources/public/ethereum.cljs.js
+.ethereum*
+.lein-repl-history
+.repl
+.nrepl-port
+.DS_Store
+figwheel_server.log
+pom.xml
