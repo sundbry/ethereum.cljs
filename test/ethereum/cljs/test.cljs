@@ -11,8 +11,10 @@
 
 (defn- init-fixture
   []
-  (let [eth-host (-> js/window .-location .-hostname)
-        eth-port 8545]
+  (let [hash-config (-> js/window .-location .-hash (.substring 1))
+        eth-config (if (empty? hash-config) {} (js->clj (.parse js/JSON hash-config)))
+        eth-host (or (get eth-config "host") (-> js/window .-location .-hostname))
+        eth-port (or (get eth-config "port") 8545)]
     (web3/set-provider (web3/http-provider (str "http://" eth-host ":" eth-port)))))
 
 (defn- test-lib [qassert]
