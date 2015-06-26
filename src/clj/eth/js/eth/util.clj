@@ -1,4 +1,4 @@
-(ns eth.js.eth.contract
+(ns eth.js.eth.util
   (:require [clojure.java.io :as io]))
 
 (defmacro source

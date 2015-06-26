@@ -2,9 +2,11 @@
   (:require
     [cljs.core.async :as async]
     [shodan.console :as log :include-macros true]
+    [eth.js.eth :as eth]
     [eth.js.eth.async :as eth-async])
   (:require-macros
-    [cljs.core.async.macros :refer [go go-loop]]))
+    [cljs.core.async.macros :refer [go go-loop]]
+    [eth.js.eth.util]))
 
 (def ^:private bignum-10e18 (js/BigNumber. "10e18"))
 
@@ -43,3 +45,26 @@
           {:block block-info :tx mined-tx}
           (recur))))))
 
+(defn build-solidity
+  [contract-name src]
+  (let [compiler-out (eth/solidity src)
+        {:strs [code info] :as this-contract} (get compiler-out contract-name)
+        contract-factory (eth/contract (get info "abiDefinition"))]
+    (assoc this-contract
+           "factory" contract-factory
+           "name" contract-name)))
+
+(defn go-mine
+  [{:strs [code factory name] :as contract-info}
+   from-address]
+  (let [latest-blocks (eth/watch "latest")
+        address (eth/send-transaction {:from from-address
+                                       :code code})
+        contract (.at factory address)
+        tx {:from from-address}
+        mined-chan (go-wait-mined latest-blocks from-address code)]
+    (go
+      (let [{:keys [block tx]} (async/<! mined-chan)]
+        (log/debug "Mined contract!" name block tx)
+        (eth/stop-watch latest-blocks)
+        contract))))

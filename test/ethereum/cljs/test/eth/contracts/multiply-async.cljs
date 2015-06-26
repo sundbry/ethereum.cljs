@@ -1,18 +1,18 @@
-(ns eth.js.test.eth.contract.multiply-async
+(ns eth.js.test.eth.contracts.multiply-async
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :as async]
     [eth.js.test.eth.fixture :refer [test-account]]
-    [eth.js.eth.contract :as contract :include-macros true]))
+    [eth.js.eth.util :as eth-util :include-macros true]))
 
 (def ^:dynamic *contract* nil)
 
 (defn build
   []
   (->> "contract/multiply-async.sol"
-      contract/source
-      (contract/build-solidity "MultiplyAsync")))
+      eth-util/source
+      (eth-util/build-solidity "MultiplyAsync")))
 
 (defn test-call [qassert])
 
@@ -31,7 +31,7 @@
 (defn run-local-tests [qunit]
   (go
     (binding [*contract* 
-              (async/<! (contract/go-mine (build) (test-account)))]
+              (async/<! (eth-util/go-mine (build) (test-account)))]
       (doto qunit
         (.module (str (namespace ::x)))
         (.test "Async call on contract" test-call)))))
